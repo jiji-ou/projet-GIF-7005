@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 # Lire le csv et le convertir en pytorch
-ds = pd.read_csv('donnees_traitees_classification.csv')
+ds = pd.read_csv('data/donnees_traitees_classification.csv')
 ds = ds.to_numpy()
 
 # Définir les données et les targets
@@ -47,4 +47,4 @@ erreur_test = 1 - model.score(X_test, y_test)
 
 # Sauvegarder les résultats
 resultats = pd.DataFrame({'C': [best_C], 'gamma': [best_gamma], 'erreur entraînement': [erreur_train], 'erreur test': [erreur_test]})
-resultats.to_csv('svm.csv', index=False)
+resultats.to_csv('resultats/svm.csv', index=False)

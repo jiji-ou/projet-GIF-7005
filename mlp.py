@@ -8,7 +8,7 @@ from torch.optim import SGD
 from sklearn.model_selection import train_test_split
 
 # Lire le csv et le convertir en pytorch
-ds = pd.read_csv('donnees_traitees_classification.csv')
+ds = pd.read_csv('data/donnees_traitees_classification.csv')
 ds = ds.to_numpy()
 ds = torch.from_numpy(ds).float()
 
@@ -78,4 +78,4 @@ correct = output.argmax(1).eq(y_test).sum().item()
 erreur_test = 1 - correct/X_test.shape[0]
 
 results = pd.DataFrame({'epochs': [epochs], 'perte finale': [loss.item()], 'erreur entraînement': [erreur_train], 'erreur test': [erreur_test]})
-results.to_csv('mlp.csv', index=False)
+results.to_csv('resultats/mlp.csv', index=False)
