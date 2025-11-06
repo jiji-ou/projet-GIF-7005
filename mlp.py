@@ -20,7 +20,7 @@ y = ds[:, -1].long()
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 # Régler la device
-device = 'cpu'
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Définition du MLP
 class Net(nn.Module):
@@ -35,7 +35,7 @@ class Net(nn.Module):
         x = F.relu(self.l1(x))
         x = F.relu(self.l2(x))
         x = F.relu(self.l3(x))
-        x = F.softmax(self.output(x), dim=-1) # On fait un softmax pour améliorer la classification
+        x = self.output(x)
         return x
 
 # Définir le modèle
