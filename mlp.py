@@ -55,11 +55,7 @@ class Net(nn.Module):
         x = self.output(x)
         return x
 
-# Définir le modèle
-net = Net(300, 20, res=True)
-
 # Mettre sur la GPU si possible
-net = net.to(device)
 X_train = X_train.to(device)
 X_test = X_test.to(device)
 y_train = y_train.to(device)
@@ -68,39 +64,47 @@ y_test = y_test.to(device)
 train_dataset = TensorDataset(X_train, y_train)
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
-# Entraînement du modèle
-optim = SGD(net.parameters(), lr=0.01)
-criterion = nn.CrossEntropyLoss()
-epochs = 500
-loss = None
-for epoch in range(epochs):
-    losses = []
-    for data, targets in train_loader:
-        optim.zero_grad()
+def train_and_test(net, name):
+    # Entraînement du modèle
+    optim = SGD(net.parameters(), lr=0.01)
+    criterion = nn.CrossEntropyLoss()
+    epochs = 500
+    loss = None
+    for epoch in range(epochs):
+        losses = []
+        for data, targets in train_loader:
+            optim.zero_grad()
 
-        output = net(data)
-        loss = criterion(output, targets)
-        losses.append(loss.item())
-        loss.backward()
+            output = net(data)
+            loss = criterion(output, targets)
+            losses.append(loss.item())
+            loss.backward()
 
-        optim.step()
+            optim.step()
 
-    print(f"epoch: {epoch}, perte: {np.array(losses).mean()}")
+        print(f"{name} - epoch: {epoch}, perte: {np.array(losses).mean()}")
 
-# Sauvegarder le réseau entraîné
-torch.save(net.state_dict(), 'models/heart-attack-mlp.pt2')
+    # Sauvegarder le réseau entraîné
+    torch.save(net.state_dict(), f'models/heart-attack-{name}.pt2')
 
-# Calculer l'erreur d'entraînement
-output = net(X_train)
-correct = output.argmax(1).eq(y_train).sum().item()
-erreur_train = 1 - correct/X_train.shape[0]
+    # Calculer l'erreur d'entraînement
+    output = net(X_train)
+    correct = output.argmax(1).eq(y_train).sum().item()
+    erreur_train = 1 - correct/X_train.shape[0]
 
-# Calculer l'erreur en test
-output = net(X_test)
-correct = output.argmax(1).eq(y_test).sum().item()
-erreur_test = 1 - correct/X_test.shape[0]
+    # Calculer l'erreur en test
+    output = net(X_test)
+    correct = output.argmax(1).eq(y_test).sum().item()
+    erreur_test = 1 - correct/X_test.shape[0]
 
-print(f"Erreur d'entraînement: {erreur_train}, erreur de test: {erreur_test}")
+    print(f"{name} - Erreur d'entraînement: {erreur_train}, erreur de test: {erreur_test}")
 
-results = pd.DataFrame({'epochs': [epochs], 'perte finale': [loss.item()], 'erreur entraînement': [erreur_train], 'erreur test': [erreur_test]})
-results.to_csv('resultats/mlp.csv', index=False)
+    results = pd.DataFrame({'epochs': [epochs], 'perte finale': [loss.item()], 'erreur entraînement': [erreur_train], 'erreur test': [erreur_test]})
+    results.to_csv(f'resultats/{name}.csv', index=False)
+
+# Définir le modèle
+resnet = Net(300, 20, res=True).to(device)
+mlp = Net(300, 5).to(device)
+
+train_and_test(mlp, 'mlp')
+train_and_test(resnet, 'resnet')
